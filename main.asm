@@ -182,6 +182,8 @@ var_0_max	RES		1
 var_1_max	RES		1
 var_2_max	RES		1
 bouton1		RES		1
+i		RES		1
+pulseWidth	RES		1
 
 
 ;*******************************************************************************
@@ -264,6 +266,16 @@ tempo
     GOTO LABEL0
 RETURN
     
+wait
+    MOVLW d'0'
+    MOVWF i
+    LOOP2
+	INCF i, 1
+	MOVLW 0xff
+	CPFSEQ i
+    GOTO LOOP2
+RETURN
+    
     
 MONTER
     ;MOVLW b'00000010'
@@ -273,6 +285,17 @@ MONTER
     MOVWf LATA
     ;CALL tempo
 RETURN
+
+ALLUMld1
+    MOVLW b'00000001'
+    MOVWF LATA
+    GOTO LOOP
+
+ALLUMld2
+    MOVLW B'00000010'
+    MOVWF LATA
+    GOTO LOOP
+
     
 DESCENDRE
     MOVLW b'00000100'
@@ -287,34 +310,32 @@ RETURN
 DECLED
     
 RETURN
+
+test
+    MOVF RCREG,0
+    BTFSC WREG,0
+    GOTO testb1
+    BTFSC WREG,5
+    GOTO testb2
+
+testb1    
+    BTFSC WREG,1
+    GOTO ALLUMld1
+    ; Augmenter luminosité pwm
     
+    GOTO LOOP
+testb2   
+    BTFSC WREG,4
+    GOTO ALLUMld2
+    ; diminuer luminosité pwm
+    GOTO LOOP
+	
     
 LOOP
     BTFSC PIR1,RCIF 
-    MOVF RCREG,0
-    CPFSEQ bouton1
+    CALL test
     GOTO LOOP
-    CALL MONTER
-    
-    
-    
-    ;GOTO READDESC
-    ;READDESC
-    ;MOVLW b'00110000'
-    ;CPFSEQ RCREG
-    ;GOTO READINCLED
-    ;CALL DESCENDRE
-    
-    ;READINCLED
-    ;MOVLW b'00001100'
-    ;CPFSEQ RCREG
-    ;GOTO READDECLED
-    ;CALL DECLED
-    
-    ;READDECLED
-    ;MOVLW b'00000011'
-    ;CPFSEQ RCREG
-    ;CALL INCLED
+
     
 GOTO LOOP
 
@@ -370,6 +391,9 @@ BEGIN
     
     MOVLW 0x00
     MOVWf LATA
+    
+    MOVLW 0xff
+    MOVWF PR2
     
     GOTO LOOP
 
